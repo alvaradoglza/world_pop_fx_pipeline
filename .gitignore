@@ -1,3 +1,7 @@
+# Added myself without checking previously included elements.
+data/
+.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
