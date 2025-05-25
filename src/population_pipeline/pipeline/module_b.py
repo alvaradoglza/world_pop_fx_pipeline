@@ -31,5 +31,7 @@ def cent_mxn(df: pd.DataFrame) -> pd.DataFrame:
     df["fx_to_mxn"] = df.apply(_rate, axis=1)
     df["mxn_from_one_cent"] = df["population"] * 0.01 * df["fx_to_mxn"]
 
+    grand_total = df['mxn_from_one_cent'].sum(skipna=True)
 
-    return df
+
+    return df, grand_total
