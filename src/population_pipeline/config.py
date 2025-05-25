@@ -4,6 +4,12 @@ Settings for the pipeline.
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+FIXER_KEY = os.getenv("FIXER_API_KEY", "")
+FIXER_URL = "https://data.fixer.io/api/latest"
 
 WORLD_BANK_BASE = "https://api.worldbank.org/v2"
 POPULATION_INDICATOR = "SP.POP.TOTL"
