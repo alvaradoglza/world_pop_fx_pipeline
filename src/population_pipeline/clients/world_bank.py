@@ -1,5 +1,6 @@
 """
 WorldBankClient, handling of the Indicators API
+
 """
 
 from __future__ import annotations
@@ -15,14 +16,31 @@ from population_pipeline.utils.http import get_json
 
 
 class WorldBankClient:
+    """
+    Client/class to retrieve the population data from the WBI API
 
+    """
    
     def latest_population(self, top_n: int | None = None) -> pd.DataFrame:
         """
-        Return a DataFrame of countries sorted by descending population.
+        Fetch data and return a DataFrame of countries sorted by descending population.
 
-        Calls to the _fetch_population_rows method to get the latest population data
-        for all countries, filters out those with no population value and creates a dataframe with that info result
+        Args:
+            top_n: If provided, limit to the top N countries by population.
+                   Otherwise, return all countries.
+
+        Returns:
+            pd.DataFrame with columns:
+                - iso3:  Three-letter country code (ISO-3)
+                - country: Full country name
+                - year: The year of the population data
+                - population: Population count as an integer
+
+            Sorted by `population` in descending order.
+
+        Raises:
+            RuntimeError: If the underlying HTTP call fails.
+            KeyError:     If expected fields are missing from the API response.
         """
 
         raw = self._fetch_population_rows()
@@ -53,7 +71,16 @@ class WorldBankClient:
     @cached_property
     def country_iso3_set(self) -> set[str]:
         """
-        ISO-3 codes for real countries only (excludes aggregates).
+        Get ISO-3 codes for countries.
+
+        Calls the '/country' endpoint once and caches the result.
+
+        Returns:
+            A set of ISO-3 codes (e.g. "USA", "MEX") for all entities
+            whose 'region.id' ≠ "NA".
+
+        Raises:
+            RuntimeError: If the HTTP call fails or returns an unexpected shape.
         """
 
         url = f"{config.WORLD_BANK_BASE}/country"
@@ -69,7 +96,15 @@ class WorldBankClient:
 
     def _fetch_population_rows(self) -> list[dict]:
         """
-        Get the most-recent population value for every entity.
+        Fetch the most-recent population value for every entity.
+
+        Returns:
+            A list of dicts, each matching the shape required by
+            `PopulationRecord`.
+
+        Raises:
+            RuntimeError: If the HTTP call reports failure.
+            KeyError:     If the returned JSON doesn’t match the expected format.
         """
 
         url = (
